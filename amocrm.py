@@ -76,7 +76,7 @@ class BaseEntity:
         return str(self)
 
     def get_field(self, field_name):
-        return self.custom_fields_values.get(field_name, {}).get('value')
+        return (self.custom_fields_values or {}).get(field_name, {}).get('value')
 
     def set_field(self, field_name, field_value, field_id=None):
         custom_field = self.custom_fields_values.get(field_name)
@@ -285,9 +285,12 @@ def amocrm_get(obj_cls: Type[BaseEntity],
                 break
             if counter < limit:
                 break
+            next_url = (json_data.get('_links') or {}).get('next', {}).get('href')
+            if not next_url:
+                break
             time.sleep(1)
             # reset url and params for page iteration
-            url = json_data['_links']['next']['href']
+            url = next_url
             params = {}
 
 
